@@ -197,3 +197,69 @@ Proof.
   - apply Hi_to_ND.
   - apply ND_to_Hi.
 Qed.
+
+Example Equ_Example: forall Γ a, 
+  (exists b, Γ ∪ [﹁a] ├Hi b /\ Γ ∪ [﹁a] ├Hi ﹁b) <-> Γ ├Hi a.
+Proof.
+  intros. split.
+  - intros. destruct H as [b [H1 H2]].
+    apply Equivalent. apply Equivalent in H1,H2. apply ND9 with b.
+    + apply H1.
+    + apply H2.
+  - intros. exists a. split.
+    + apply HiUnion_l. apply H.
+    + apply Hi0. apply Union_intror. reflexivity.
+Qed.
+
+Lemma Lemma1: forall Γ a b, Γ ├Hi ﹁b → (b → a).
+Proof.
+  assert (H0: forall Γ a b, Γ ├Hi a → (b → a)).
+  { intros. pose proof (Hi2 Γ a ﹁b) as H1. pose proof (Hi3 Γ a ﹁b) as H2.
+  pose proof (PT1 Γ a (a ∨ ﹁b) (﹁b ∨ a)) as H3.
+  pose proof (MP Γ _ _ H3 H2) as H4.  pose proof (MP Γ _ _ H4 H1). apply H. }
+  assert (H1: forall Γ a b, Γ ├Hi (﹁a → ﹁b) → (b → a)).
+  { intros. pose proof (PT6 Γ a) as H1. 
+  pose proof (Hi4 Γ ﹁b ﹁﹁a a) as H2. pose proof (MP Γ _ _ H2 H1) as H3.
+  pose proof (Hi3 Γ ﹁﹁a ﹁b) as H4.
+  pose proof (PT1 Γ (﹁﹁a ∨ ﹁b) (﹁b ∨ ﹁﹁a) (﹁b ∨ a)) as H5.
+  pose proof (MP Γ _ _ H5 H3) as H6. 
+  pose proof (MP Γ _ _ H6 H4). apply H. }
+  intros. pose proof H1 Γ a b. pose proof H0 Γ ((﹁ a → ﹁ b) → b → a) ﹁b.
+  pose proof MP _ _ _ H2 H.
+  pose proof PT_con_dis Γ ﹁b (﹁ a → ﹁ b) (b → a).
+  pose proof MP _ _ _ H4 H3. pose proof H0 Γ ﹁b ﹁a.
+  pose proof MP _ _ _ H5 H6. apply H7.
+Qed.
+
+Lemma Lemma2: forall Γ a, Γ ├Hi (﹁a → a) → a.
+Proof.
+  assert (H0: forall Γ a b, Γ ├Hi (﹁a → ﹁b) → (b → a)).
+  { intros. pose proof (PT6 Γ a) as H1. 
+  pose proof (Hi4 Γ ﹁b ﹁﹁a a) as H2. pose proof (MP Γ _ _ H2 H1) as H3.
+  pose proof (Hi3 Γ ﹁﹁a ﹁b) as H4.
+  pose proof (PT1 Γ (﹁﹁a ∨ ﹁b) (﹁b ∨ ﹁﹁a) (﹁b ∨ a)) as H5.
+  pose proof (MP Γ _ _ H5 H3) as H6. 
+  pose proof (MP Γ _ _ H6 H4). apply H. }
+  intros. pose proof Lemma1 Γ ﹁(﹁a → a) a.
+  pose proof PT_con_dis Γ ﹁a a ﹁(﹁a → a).
+  pose proof MP _ _ _ H1 H. apply ni_deductive_Hi in H2.
+  pose proof H0 (Γ ∪ [﹁ a → a]) a (﹁a → a).
+  pose proof MP _ _ _ H3 H2.
+  assert (Γ ∪ [﹁ a → a] ├Hi (﹁ a → a)).
+  { apply Hi0. apply Union_intror. reflexivity. }
+  pose proof MP _ _ _ H4 H5. apply deductive_Hi in H6. apply H6.
+Qed.
+
+Example Equ_Example': forall Γ a, 
+  (exists b, Γ ∪ [﹁a] ├Hi b /\ Γ ∪ [﹁a] ├Hi ﹁b) <-> Γ ├Hi a.
+Proof.
+  intros. split.
+  - intros. destruct H as [b [H1 H2]].
+    pose proof Lemma1 (Γ ∪ [﹁ a]) a b.
+    pose proof MP _ _ _ H H2. pose proof MP _ _ _ H0 H1.
+    apply deductive_Hi in H3. pose proof Lemma2 Γ a.
+    pose proof MP _ _ _ H4 H3. apply H5.
+  - intros. exists a. split.
+    + apply HiUnion_l. apply H.
+    + apply Hi0. apply Union_intror. reflexivity.
+Qed.
